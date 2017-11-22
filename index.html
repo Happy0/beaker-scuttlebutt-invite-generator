@@ -1,0 +1,103 @@
+<html>
+    <head>
+        <script>
+          function writeInviteContents(details) {
+            console.dir(details);
+            var thisProjectArchive = new DatArchive(window.location);
+
+            thisProjectArchive.readFile("template.html", {
+              encoding: "utf-8"
+            }).then(contents => {
+
+              var inviteContents =
+                contents.replace(getPlaceholderText("recipient"), details.recipient)
+                  .replace(getPlaceholderText("pub"), details.pub)
+                  .replace(getPlaceholderText("invite-code"), details.inviteCode)
+                  .replace(getPlaceholderText("public-key"), details.publicKey)
+                  .replace(getPlaceholderText("username"), details.userName)
+                  .replace(getPlaceholderText("channel-one"), details.channelOne)
+                  .replace(getPlaceholderText("channel-two"), details.channelTwo)
+                  .replace(getPlaceholderText("channel-three"), details.channelThree)
+                  .replace(getPlaceholderText("sender"), details.sender);
+
+              var inviteDat = DatArchive.create({
+                title: "Invite to " + details.recipient,
+                description: "Scuttlebutt invite to " + details.recipient
+              })
+
+              inviteDat.then(invite => {
+                invite.writeFile("index.html", inviteContents)
+
+                thisProjectArchive.readFile("stylesheet.css", {
+                  encoding: "utf-8"
+                }).then(stylesheetText => invite.writeFile("stylesheet.css", stylesheetText))
+              });
+
+            });
+          }
+
+          function getInputValue(inputId) {
+            return document.getElementById(inputId) ? document.getElementById(inputId).value : null;
+          }
+
+          function getPlaceholderText(name) {
+            return "{" + name + "}"
+          }
+
+          function getInviteDetails() {
+            return {
+              recipient: getInputValue("recipient"),
+              pub: getInputValue("pub"),
+              inviteCode: getInputValue("invite_code"),
+              publicKey: getInputValue("pub_key"),
+              userName: getInputValue("user_name"),
+              channelOne: getInputValue("channel_one"),
+              channelTwo: getInputValue("channel_two"),
+              channelThree: getInputValue("channel_three"),
+              sender: getInputValue("my_name")
+            };
+          }
+
+          function makeSite() {
+            var details = getInviteDetails();
+            writeInviteContents(details);
+          }
+
+        </script>
+
+        <body>
+          <div> Wit's yer pal cawed? </div>
+          <input id="recipient"></input>
+
+          <div> Wit pub ye inviting thum tae? </div>
+          <input id="pub"></input>
+
+          <div> Wit's thur invite code? </div>
+          <input id="invite_code"></input>
+
+          <div> Wit's yer public key? </div>
+          <input id="pub_key"></input>
+
+          <div> Wit's yer user name? </div>
+          <input id="user_name"></input>
+
+          <div> Wit channel wid ye recommend tae yer pal? (Wae a hash, mind.)</div>
+          <input id="channel_one"> </input>
+
+          <div> Geez another channel. </div>
+          <input id="channel_two"> </input>
+
+          <div> Wan mair </div>
+          <input id="channel_three"></input>
+
+          <div> Wit name does yer pal ken ye by? </div>
+          <input id="my_name"> </input>
+
+          <div>
+            <button onclick="makeSite()"> Make site </button>
+          </div>
+
+        </body>
+
+    </head>
+</html>
